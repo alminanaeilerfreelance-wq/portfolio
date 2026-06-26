@@ -1,7 +1,6 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
-
 import { json } from "@/app/_lib/api";
+
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 export async function POST(request) {
   try {
@@ -14,17 +13,15 @@ export async function POST(request) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const extension = path.extname(file.name || "");
-    const safeName = `${Date.now()}-${Math.random()
-      .toString(36)
-      .slice(2)}${extension}`.replace(/[^a-zA-Z0-9.-]/g, "");
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    const diskPath = path.join(uploadDir, safeName);
 
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(diskPath, buffer);
+    if (buffer.byteLength > MAX_UPLOAD_BYTES) {
+      return json({ message: "Upload must be 4MB or smaller" }, 400);
+    }
 
-    return json({ url: `/uploads/${safeName}` }, 201);
+    const mimeType = file.type || "application/octet-stream";
+    const dataUrl = `data:${mimeType};base64,${buffer.toString("base64")}`;
+
+    return json({ url: dataUrl }, 201);
   } catch (error) {
     return json({ message: error.message }, 400);
   }

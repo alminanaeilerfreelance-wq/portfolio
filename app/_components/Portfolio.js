@@ -9,7 +9,7 @@ import { defaultPortfolio } from "@/app/_lib/defaultData";
 
 const imageSrc = (portfolio) => {
   const value = portfolio.image || portfolio.imageUrl || "";
-  if (value.startsWith("/") || value.startsWith("http")) return value;
+  if (value.startsWith("/") || value.startsWith("http") || value.startsWith("data:")) return value;
   return `/portfolio/${value}`;
 };
 
@@ -39,6 +39,7 @@ export default function Page() {
                 fill
                 className="object-cover"
                 alt={portfolio.title}
+                unoptimized
               />
             </div>
             <div className="p-8">

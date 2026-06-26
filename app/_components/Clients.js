@@ -8,7 +8,7 @@ import Link from "next/link";
 
 const imageSrc = (client) => {
   const value = client.image || "";
-  if (value.startsWith("/") || value.startsWith("http")) return value;
+  if (value.startsWith("/") || value.startsWith("http") || value.startsWith("data:")) return value;
   return `/clients/${value}`;
 };
 

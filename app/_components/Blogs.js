@@ -9,7 +9,7 @@ import Link from "next/link";
 
 const imageSrc = (product) => {
   const value = product.image || "";
-  if (value.startsWith("/") || value.startsWith("http")) return value;
+  if (value.startsWith("/") || value.startsWith("http") || value.startsWith("data:")) return value;
   return `/blogs/${value}`;
 };
 
@@ -78,6 +78,7 @@ export default function Page() {
             alt={product.title || product.name}
             fill
             className="object-cover"
+            unoptimized
           />
         </div>
         <div className="p-6">

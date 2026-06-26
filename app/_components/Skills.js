@@ -7,7 +7,7 @@ import { defaultSkills } from "@/app/_lib/defaultData";
 
 const imageSrc = (skill) => {
   const value = skill.image || "";
-  if (value.startsWith("/") || value.startsWith("http")) return value;
+  if (value.startsWith("/") || value.startsWith("http") || value.startsWith("data:")) return value;
   return `/uploads/${value}`;
 };
 
