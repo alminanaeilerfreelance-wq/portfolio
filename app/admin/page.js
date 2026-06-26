@@ -336,11 +336,13 @@ function ContentManager({ section }) {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
+  const [readOnly, setReadOnly] = useState(false);
 
   useEffect(() => {
     setForm(emptyFor(section.fields));
     setEditingId("");
     setPage(1);
+    setReadOnly(false);
     loadItems();
   }, [section.key]);
 
@@ -357,6 +359,7 @@ function ContentManager({ section }) {
     try {
       const response = await fetch(`/api/admin/${section.key}`);
       const data = await readJson(response);
+      setReadOnly(Boolean(data.readOnly));
 
       if (!response.ok) {
         setItems([]);
@@ -379,6 +382,13 @@ function ContentManager({ section }) {
   async function submit(event) {
     event.preventDefault();
     setStatus("");
+
+    if (readOnly) {
+      setStatus(
+        "Database connection is unavailable. Add, edit, update, and delete will work after MongoDB Atlas allows this Vercel deployment to connect.",
+      );
+      return;
+    }
 
     if (editingId && !editingId.trim()) {
       setStatus("Select a saved database record before updating.");
@@ -406,6 +416,13 @@ function ContentManager({ section }) {
   }
 
   async function remove(id) {
+    if (readOnly) {
+      setStatus(
+        "Database connection is unavailable. Delete will work after MongoDB Atlas allows this Vercel deployment to connect.",
+      );
+      return;
+    }
+
     if (!id) {
       setStatus("This default record is not saved in the database yet.");
       return;
@@ -465,6 +482,11 @@ function ContentManager({ section }) {
   return (
     <div className="px-5 pb-10 md:px-10">
       <form onSubmit={submit} className="mb-6 rounded-lg bg-white p-6 shadow-[0_4px_18px_rgba(47,43,61,0.12)]">
+        {readOnly && (
+          <div className="mb-5 rounded-md border border-solid border-[#ff9f43]/30 bg-[#fff4e5] p-4 text-sm font-medium text-[#b75e00]">
+            Database connection is unavailable. This page is showing fallback content only. Add, edit, update, and delete will be enabled after MongoDB Atlas Network Access allows Vercel.
+          </div>
+        )}
         <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold">{editingId ? "Update Record" : "Add Record"}</h2>
@@ -484,7 +506,10 @@ function ContentManager({ section }) {
                 Cancel
               </button>
             )}
-            <button className="inline-flex items-center gap-2 rounded-md border-0 bg-[#8c57ff] px-5 py-3 font-semibold text-white">
+            <button
+              disabled={readOnly}
+              className="inline-flex items-center gap-2 rounded-md border-0 bg-[#8c57ff] px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
               <PlusIcon className="h-5 w-5" />
               {editingId ? "Update" : "Add"}
             </button>
@@ -498,14 +523,16 @@ function ContentManager({ section }) {
                 <div className="rounded-md border border-solid border-[#d9d7e3] p-3">
                   <input
                     type="file"
+                    disabled={readOnly}
                     onChange={(event) => uploadFile(key, event.target.files?.[0])}
-                    className="w-full text-sm"
+                    className="w-full text-sm disabled:cursor-not-allowed disabled:opacity-50"
                   />
                   <input
                     value={form[key] || ""}
+                    disabled={readOnly}
                     onChange={(event) => setForm({ ...form, [key]: event.target.value })}
                     placeholder="Uploaded file URL"
-                    className="mt-3 h-10 w-full rounded-md border border-solid border-[#ebe9f1] px-3 outline-none focus:border-[#8c57ff]"
+                    className="mt-3 h-10 w-full rounded-md border border-solid border-[#ebe9f1] px-3 outline-none focus:border-[#8c57ff] disabled:cursor-not-allowed disabled:bg-[#f8f7fb]"
                   />
                   {form[key] && (
                     <a
@@ -521,15 +548,17 @@ function ContentManager({ section }) {
               ) : type === "textarea" ? (
                 <textarea
                   value={form[key] || ""}
+                  disabled={readOnly}
                   onChange={(event) => setForm({ ...form, [key]: event.target.value })}
                   rows={4}
-                  className="w-full rounded-md border border-solid border-[#d9d7e3] p-3 outline-none focus:border-[#8c57ff]"
+                  className="w-full rounded-md border border-solid border-[#d9d7e3] p-3 outline-none focus:border-[#8c57ff] disabled:cursor-not-allowed disabled:bg-[#f8f7fb]"
                 />
               ) : (
                 <input
                   value={form[key] || ""}
+                  disabled={readOnly}
                   onChange={(event) => setForm({ ...form, [key]: event.target.value })}
-                  className="h-12 w-full rounded-md border border-solid border-[#d9d7e3] px-3 outline-none focus:border-[#8c57ff]"
+                  className="h-12 w-full rounded-md border border-solid border-[#d9d7e3] px-3 outline-none focus:border-[#8c57ff] disabled:cursor-not-allowed disabled:bg-[#f8f7fb]"
                 />
               )}
             </label>
