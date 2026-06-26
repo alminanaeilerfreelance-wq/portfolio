@@ -366,6 +366,9 @@ function ContentManager({ section }) {
       }
 
       setItems(data.items || []);
+      if (data.readOnly && data.message) {
+        setStatus(data.message);
+      }
     } catch (error) {
       setItems([]);
       setStatus(error.message || `Failed to load ${section.label}.`);

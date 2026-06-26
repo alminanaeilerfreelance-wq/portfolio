@@ -24,8 +24,9 @@ const defaults = {
 };
 
 export async function GET(_request, { params }) {
+  const { collection } = await params;
+
   try {
-    const { collection } = await params;
     const col = await getCollection(collection);
     const count = await col.countDocuments();
     if (count === 0 && defaults[collection]?.length) {
@@ -41,6 +42,16 @@ export async function GET(_request, { params }) {
     const docs = await col.find({}).sort({ order: 1, createdAt: -1 }).toArray();
     return json({ items: serializeMany(docs) });
   } catch (error) {
+    if (defaults[collection]) {
+      return json({
+        items: defaults[collection],
+        readOnly: true,
+        message:
+          "Database connection failed. Showing default content until MongoDB Atlas allows this deployment to connect.",
+        details: error.message,
+      });
+    }
+
     return json({ message: error.message }, 400);
   }
 }
