@@ -32,29 +32,47 @@ export default function Page() {
   ];
 
   useEffect(() => {
-    ProductService.getTestimonials().then((data) =>
-      setTestimonial(data.slice(0, 6))
-    );
+    fetch("/api/admin/testimonials")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.items?.length) {
+          setTestimonial(data.items);
+        } else {
+          ProductService.getTestimonials().then((fallback) =>
+            setTestimonial(fallback.slice(0, 6))
+          );
+        }
+      })
+      .catch(() => {
+        ProductService.getTestimonials().then((fallback) =>
+          setTestimonial(fallback.slice(0, 6))
+        );
+      });
   }, []);
 
   const testimonialTemplate = (testimonial) => {
     return (
-      <div className="w-3/5 mx-auto text-center">
-        <div className="text-gray-800 text-lg font-medium">
-          {testimonial.text}
-        </div>
-        <div className="text-black text-lg font-medium mt-6">
-          {testimonial.userName}
-        </div>
-        <div className="text-black font-light mt-2 mb-8">
-          {testimonial.userPost}, {testimonial.userCompany}
+      <div className="mx-auto w-full max-w-4xl px-3 text-center">
+        <div className="rounded-2xl border border-solid border-blue-200/15 bg-white/[0.06] px-6 py-8 shadow-[0_18px_60px_rgba(0,0,0,0.24)] backdrop-blur md:px-10">
+          <div className="mx-auto mb-6 grid h-12 w-12 place-items-center rounded-full bg-blue-600 text-3xl font-black text-white shadow-[0_0_30px_rgba(37,99,235,.35)]">
+            &quot;
+          </div>
+          <div className="text-lg font-medium leading-8 text-slate-200 md:text-xl">
+            {testimonial.text}
+          </div>
+          <div className="mt-7 text-lg font-black text-white">
+            {testimonial.userName}
+          </div>
+          <div className="mt-2 text-sm font-semibold uppercase tracking-wide text-cyan-200">
+            {testimonial.userPost}, {testimonial.userCompany}
+          </div>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="card">
+    <div className="card bg-transparent">
       <Carousel
         value={testimonial}
         numVisible={1}

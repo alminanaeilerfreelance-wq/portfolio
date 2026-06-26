@@ -2,9 +2,16 @@
 import React, { useState, useEffect } from "react";
 import { Carousel } from "primereact/carousel";
 import { ProductService } from "../service/ProductService";
+import { defaultBlogs } from "@/app/_lib/defaultData";
 
 import Image from "next/image";
 import Link from "next/link";
+
+const imageSrc = (product) => {
+  const value = product.image || "";
+  if (value.startsWith("/") || value.startsWith("http")) return value;
+  return `/blogs/${value}`;
+};
 
 export default function Page() {
   const [products, setProducts] = useState([]);
@@ -48,9 +55,18 @@ export default function Page() {
   };
 
   useEffect(() => {
-    ProductService.getProductsSmall().then((data) =>
-      setProducts(data.slice(0, 9))
-    );
+    fetch("/api/admin/blogs")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.items?.length) {
+          setProducts(data.items);
+        } else {
+          ProductService.getProductsSmall().then((fallback) =>
+            setProducts(fallback.slice(0, 9))
+          );
+        }
+      })
+      .catch(() => setProducts(defaultBlogs));
   }, []);
 
   const productTemplate = (product) => {
@@ -58,22 +74,23 @@ export default function Page() {
       <div className="bg-white rounded-lg border border-solid border-gray-50 mx-3 overflow-hidden">
         <div className="relative w-full h-56">
           <Image
-            src={`/blogs/${product.image}`}
-            alt={product.name}
+            src={imageSrc(product)}
+            alt={product.title || product.name}
             fill
             className="object-cover"
           />
         </div>
         <div className="p-6">
-          <div className="text-gray-400 text-sm">
-            22 Oct, 2020 / 245 Comments
-          </div>
+          <div className="text-gray-400 text-sm">{product.category}</div>
           <Link
-            href="#"
+            href={product.link || "#"}
             className="text-gray-950 text-lg font-medium no-underline"
+            target={product.link?.startsWith("http") ? "_blank" : undefined}
+            rel={product.link?.startsWith("http") ? "noopener noreferrer" : undefined}
           >
-            Lorem ipsum dolor sit consea. Nulla purus arcu dolor sit consea
+            {product.title || product.name}
           </Link>
+          <p className="text-gray-600 text-sm mt-3">{product.description}</p>
         </div>
       </div>
     );

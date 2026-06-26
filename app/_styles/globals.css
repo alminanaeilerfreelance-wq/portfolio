@@ -6,8 +6,8 @@
 @tailwind components;
 @tailwind utilities;
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #061223;
+  --foreground: #ededed;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,6 +26,52 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0px;
   padding: 0px;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.glass {
+  backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.neon {
+  box-shadow: 0 0 20px #3b82f6, 0 0 60px #3b82f6, 0 0 120px #60a5fa;
+}
+
+@keyframes skillSlide {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+.skill-track {
+  animation: skillSlide 28s linear infinite;
+}
+
+.skill-slider:hover .skill-track {
+  animation-play-state: paused;
 }
 blockquote,
 dl,

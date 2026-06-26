@@ -4,8 +4,6 @@ const nextConfig = {
     domains: ["primefaces.org"],
     unoptimized: true,
   },
-  output: "export",
-  distDir: "dist",
 };
 
 export default nextConfig;

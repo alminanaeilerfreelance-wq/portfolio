@@ -1,78 +1,44 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 
+import { defaultPortfolio } from "@/app/_lib/defaultData";
+
+const imageSrc = (portfolio) => {
+  const value = portfolio.image || portfolio.imageUrl || "";
+  if (value.startsWith("/") || value.startsWith("http")) return value;
+  return `/portfolio/${value}`;
+};
+
 export default function Page() {
-  const portfolioData = [
-    {
-      id: 1,
-      imageUrl: "portfolio-1.jpg",
-      category: "UI-UX DESIGN",
-      title: "Product Admin Dashboard",
-      description:
-        "Vivamus eleifend convallis ante, non pharetra libero molestie laoreet. Donec id imperdiet lacus.",
-      link: "#",
-    },
-    {
-      id: 2,
-      imageUrl: "portfolio-2.jpg",
-      category: "UI-UX DESIGN",
-      title: "Product Admin Dashboard",
-      description:
-        "Vivamus eleifend convallis ante, non pharetra libero molestie laoreet. Donec id imperdiet lacus.",
-      link: "#",
-    },
-    {
-      id: 3,
-      imageUrl: "portfolio-3.jpg",
-      category: "UI-UX DESIGN",
-      title: "Product Admin Dashboard",
-      description:
-        "Vivamus eleifend convallis ante, non pharetra libero molestie laoreet. Donec id imperdiet lacus.",
-      link: "#",
-    },
-    {
-      id: 4,
-      imageUrl: "portfolio-4.jpg",
-      category: "UI-UX DESIGN",
-      title: "Product Admin Dashboard",
-      description:
-        "Vivamus eleifend convallis ante, non pharetra libero molestie laoreet. Donec id imperdiet lacus.",
-      link: "#",
-    },
-    {
-      id: 5,
-      imageUrl: "portfolio-5.jpg",
-      category: "UI-UX DESIGN",
-      title: "Product Admin Dashboard",
-      description:
-        "Vivamus eleifend convallis ante, non pharetra libero molestie laoreet. Donec id imperdiet lacus.",
-      link: "#",
-    },
-    {
-      id: 6,
-      imageUrl: "portfolio-6.jpg",
-      category: "UI-UX DESIGN",
-      title: "Product Admin Dashboard",
-      description:
-        "Vivamus eleifend convallis ante, non pharetra libero molestie laoreet. Donec id imperdiet lacus.",
-      link: "#",
-    },
-  ];
+  const [portfolioData, setPortfolioData] = useState(defaultPortfolio);
+
+  useEffect(() => {
+    fetch("/api/admin/portfolio")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.items?.length) setPortfolioData(data.items);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-16">
         {portfolioData.map((portfolio) => (
           <div
-            key={portfolio.id}
+            key={portfolio._id || portfolio.title}
             className="bg-white rounded-lg border border-solid border-[#E6E8EB] overflow-hidden "
           >
             <div className="relative h-[248px]">
               <Image
-                src={`portfolio/${portfolio.imageUrl}`}
+                src={imageSrc(portfolio)}
                 fill
                 className="object-cover"
-                alt="blog"
+                alt={portfolio.title}
               />
             </div>
             <div className="p-8">
@@ -87,10 +53,16 @@ export default function Page() {
               </div>
 
               <Link
-                href={`/${portfolio.link}`}
+                href={portfolio.link}
                 className="p-button p-button-outlined mt-5 text-primary-500 font-bold no-underline"
+                target={portfolio.link.startsWith("http") ? "_blank" : undefined}
+                rel={
+                  portfolio.link.startsWith("http")
+                    ? "noopener noreferrer"
+                    : undefined
+                }
               >
-                Case Study
+                {portfolio.linkLabel || "Case Study"}
                 <ArrowRightIcon className="size-6 text-primary-500 ml-3" />
               </Link>
             </div>

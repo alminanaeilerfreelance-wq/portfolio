@@ -4,9 +4,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import Footer from "@/app/_components/Footer";
-import Header from "@/app/_components/Header";
-import ScrollToTop from "@/app/_components/ScrollToTop";
+import AppShell from "@/app/_components/AppShell";
 
 import { Work_Sans } from "next/font/google";
 
@@ -19,41 +17,42 @@ import "@/app/_styles/globals.css";
 
 export const metadata = {
   title: {
-    template: "%s | Portfolio",
-    default: "Home | Portfolio",
+    template: "%s | Alminana Eiler B.",
+    default: "Alminana Eiler B. | Web Developer",
   },
   description:
-    "A free, responsive personal portfolio template built with Next.js. Perfect for developers and designers.",
+    "Portfolio of Alminana Eiler B., a Web Developer in Al Qassim, Saudi Arabia specializing in Laravel, PHP, React.js, Node.js, APIs, and website maintenance.",
   other: {
     "google-site-verification": "hGgJ7ZV9h3yw2n1zthtkDYAPJGaponAGhqWXlFvtPvA",
   },
   keywords: [
     "Next.js portfolio",
     "nextjs",
-    "free portfolio template",
-    "developer portfolio",
-    "personal website",
-    "tailwindcss template",
+    "web developer",
+    "Laravel developer",
+    "PHP developer",
+    "React developer",
+    "Saudi Arabia web developer",
   ],
   authors: [
-    { name: "Khurram Shafeeq", url: "https://khurramshafeeq.vercel.app/" },
+    { name: "Alminana Eiler B." },
   ],
-  creator: "Khurram Shafeeq",
-  publisher: "Khurram Shafeeq",
-  metadataBase: new URL("https://khurramshafeeq.vercel.app/"),
+  creator: "Alminana Eiler B.",
+  publisher: "Alminana Eiler B.",
+  metadataBase: new URL("https://alminanaeilerb.vercel.app/"),
 
   openGraph: {
-    title: "Home | Portfolio",
+    title: "Alminana Eiler B. | Web Developer",
     description:
-      "A free, responsive personal portfolio template built with Next.js. Perfect for developers and designers.",
-    url: "https://khurramshafeeq.vercel.app/",
-    siteName: "Free Picto Portfolio Template",
+      "Laravel, PHP, React.js, Node.js, API, database, and website maintenance portfolio.",
+    url: "https://alminanaeilerb.vercel.app/",
+    siteName: "Alminana Eiler B. Portfolio",
     images: [
       {
         url: "/og-image.jpg", // stored in public folder
         width: 1920,
         height: 1005,
-        alt: "Portfolio Preview Image",
+        alt: "Alminana Eiler B. Portfolio Preview",
       },
     ],
     locale: "en_US",
@@ -62,9 +61,8 @@ export const metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Home | Portfolio",
-    description: "Portfolio of my work",
-    creator: "@Khurram_shafeeq",
+    title: "Alminana Eiler B. | Web Developer",
+    description: "Portfolio of my web development work",
     images: ["/og-image.jpg"],
   },
 
@@ -85,16 +83,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${worksans.className}`}>
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-grow">
-            {children}
-            <Analytics />
-            <SpeedInsights />
-          </main>
-          <Footer />
-          <ScrollToTop />
-        </div>
+        <AppShell>
+          {children}
+          <Analytics />
+          <SpeedInsights />
+        </AppShell>
       </body>
     </html>
   );
