@@ -1,7 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["primefaces.org"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "primefaces.org",
+      },
+    ],
     unoptimized: true,
   },
 };
