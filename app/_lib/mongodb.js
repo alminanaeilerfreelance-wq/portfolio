@@ -6,6 +6,7 @@ const dbName = process.env.MONGODB_DB || "portfolio";
 let clientPromise;
 
 const clientOptions = {
+  family: 4,
   serverSelectionTimeoutMS: 10000,
   ...(uri?.startsWith("mongodb+srv://") ? { tls: true } : {}),
 };
