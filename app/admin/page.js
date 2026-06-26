@@ -119,7 +119,6 @@ const sections = [
     key: "contacts",
     label: "Contact Messages",
     icon: InboxIcon,
-    readonly: true,
     fields: [
       ["name", "Name"],
       ["email", "Email"],
@@ -380,6 +379,12 @@ function ContentManager({ section }) {
   async function submit(event) {
     event.preventDefault();
     setStatus("");
+
+    if (editingId && !editingId.trim()) {
+      setStatus("Select a saved database record before updating.");
+      return;
+    }
+
     const method = editingId ? "PUT" : "POST";
     const url = editingId ? `/api/admin/${section.key}/${editingId}` : `/api/admin/${section.key}`;
     const response = await fetch(url, {
@@ -401,6 +406,11 @@ function ContentManager({ section }) {
   }
 
   async function remove(id) {
+    if (!id) {
+      setStatus("This default record is not saved in the database yet.");
+      return;
+    }
+
     const response = await fetch(`/api/admin/${section.key}/${id}`, { method: "DELETE" });
     const data = await readJson(response);
 
@@ -414,9 +424,20 @@ function ContentManager({ section }) {
   }
 
   function edit(item) {
+    if (!item._id) {
+      setStatus("This default record is not saved in the database yet.");
+      return;
+    }
+
     setEditingId(item._id);
     setForm(Object.fromEntries(section.fields.map(([key]) => [key, item[key] || ""])));
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function cancelEdit() {
+    setEditingId("");
+    setForm(emptyFor(section.fields));
+    setStatus("");
   }
 
   async function uploadFile(key, file) {
@@ -443,63 +464,79 @@ function ContentManager({ section }) {
 
   return (
     <div className="px-5 pb-10 md:px-10">
-      {!section.readonly && (
-        <form onSubmit={submit} className="mb-6 rounded-lg bg-white p-6 shadow-[0_4px_18px_rgba(47,43,61,0.12)]">
-          <div className="mb-5 flex items-center justify-between">
+      <form onSubmit={submit} className="mb-6 rounded-lg bg-white p-6 shadow-[0_4px_18px_rgba(47,43,61,0.12)]">
+        <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
             <h2 className="text-xl font-semibold">{editingId ? "Update Record" : "Add Record"}</h2>
+            <p className="mt-1 text-sm text-[#7c7891]">
+              {editingId
+                ? "Edit the selected record, then save the update."
+                : `Create a new ${section.label.toLowerCase()} record.`}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {editingId && (
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="inline-flex items-center gap-2 rounded-md border border-solid border-[#d9d7e3] bg-white px-5 py-3 font-semibold text-[#4b465c]"
+              >
+                Cancel
+              </button>
+            )}
             <button className="inline-flex items-center gap-2 rounded-md border-0 bg-[#8c57ff] px-5 py-3 font-semibold text-white">
               <PlusIcon className="h-5 w-5" />
               {editingId ? "Update" : "Add"}
             </button>
           </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {section.fields.map(([key, label, type]) => (
-              <label key={key} className={type === "textarea" ? "md:col-span-2" : ""}>
-                <span className="mb-2 block text-sm text-[#6f6b7d]">{label}</span>
-                {type === "file" ? (
-                  <div className="rounded-md border border-solid border-[#d9d7e3] p-3">
-                    <input
-                      type="file"
-                      onChange={(event) => uploadFile(key, event.target.files?.[0])}
-                      className="w-full text-sm"
-                    />
-                    <input
-                      value={form[key] || ""}
-                      onChange={(event) => setForm({ ...form, [key]: event.target.value })}
-                      placeholder="Uploaded file URL"
-                      className="mt-3 h-10 w-full rounded-md border border-solid border-[#ebe9f1] px-3 outline-none focus:border-[#8c57ff]"
-                    />
-                    {form[key] && (
-                      <a
-                        href={form[key]}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block text-sm text-[#8c57ff]"
-                      >
-                        Preview uploaded file
-                      </a>
-                    )}
-                  </div>
-                ) : type === "textarea" ? (
-                  <textarea
-                    value={form[key] || ""}
-                    onChange={(event) => setForm({ ...form, [key]: event.target.value })}
-                    rows={4}
-                    className="w-full rounded-md border border-solid border-[#d9d7e3] p-3 outline-none focus:border-[#8c57ff]"
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {section.fields.map(([key, label, type]) => (
+            <label key={key} className={type === "textarea" ? "md:col-span-2" : ""}>
+              <span className="mb-2 block text-sm text-[#6f6b7d]">{label}</span>
+              {type === "file" ? (
+                <div className="rounded-md border border-solid border-[#d9d7e3] p-3">
+                  <input
+                    type="file"
+                    onChange={(event) => uploadFile(key, event.target.files?.[0])}
+                    className="w-full text-sm"
                   />
-                ) : (
                   <input
                     value={form[key] || ""}
                     onChange={(event) => setForm({ ...form, [key]: event.target.value })}
-                    className="h-12 w-full rounded-md border border-solid border-[#d9d7e3] px-3 outline-none focus:border-[#8c57ff]"
+                    placeholder="Uploaded file URL"
+                    className="mt-3 h-10 w-full rounded-md border border-solid border-[#ebe9f1] px-3 outline-none focus:border-[#8c57ff]"
                   />
-                )}
-              </label>
-            ))}
-          </div>
-          {status && <p className="mt-4 text-sm text-[#56ca00]">{status}</p>}
-        </form>
-      )}
+                  {form[key] && (
+                    <a
+                      href={form[key]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-block text-sm text-[#8c57ff]"
+                    >
+                      Preview uploaded file
+                    </a>
+                  )}
+                </div>
+              ) : type === "textarea" ? (
+                <textarea
+                  value={form[key] || ""}
+                  onChange={(event) => setForm({ ...form, [key]: event.target.value })}
+                  rows={4}
+                  className="w-full rounded-md border border-solid border-[#d9d7e3] p-3 outline-none focus:border-[#8c57ff]"
+                />
+              ) : (
+                <input
+                  value={form[key] || ""}
+                  onChange={(event) => setForm({ ...form, [key]: event.target.value })}
+                  className="h-12 w-full rounded-md border border-solid border-[#d9d7e3] px-3 outline-none focus:border-[#8c57ff]"
+                />
+              )}
+            </label>
+          ))}
+        </div>
+        {status && <p className="mt-4 text-sm text-[#56ca00]">{status}</p>}
+      </form>
 
       {status && (
         <div className="mb-6 rounded-md border border-solid border-[#d9d7e3] bg-white p-4 text-sm text-[#6f6b7d] shadow-[0_4px_18px_rgba(47,43,61,0.08)]">
@@ -536,17 +573,19 @@ function ContentManager({ section }) {
                     ))}
                     <td className="p-3">
                       <div className="flex gap-2">
-                        {!section.readonly && (
-                          <button
-                            onClick={() => edit(item)}
-                            className="grid h-9 w-9 place-items-center rounded-md border-0 bg-[#eee5ff] text-[#8c57ff]"
-                          >
-                            <PencilSquareIcon className="h-5 w-5" />
-                          </button>
-                        )}
+                        <button
+                          onClick={() => edit(item)}
+                          disabled={!item._id}
+                          title={item._id ? "Edit record" : "Database record required"}
+                          className="grid h-9 w-9 place-items-center rounded-md border-0 bg-[#eee5ff] text-[#8c57ff] disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <PencilSquareIcon className="h-5 w-5" />
+                        </button>
                         <button
                           onClick={() => remove(item._id)}
-                          className="grid h-9 w-9 place-items-center rounded-md border-0 bg-[#ffe9ea] text-[#ff4c51]"
+                          disabled={!item._id}
+                          title={item._id ? "Delete record" : "Database record required"}
+                          className="grid h-9 w-9 place-items-center rounded-md border-0 bg-[#ffe9ea] text-[#ff4c51] disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>
