@@ -20,6 +20,7 @@ const defaults = {
   experience: defaultExperience,
   testimonials: defaultTestimonials,
   clients: defaultClients,
+  contacts: [],
   personal: [defaultPersonalInfo],
 };
 
