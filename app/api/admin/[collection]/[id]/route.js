@@ -8,9 +8,11 @@ export async function PUT(request, { params }) {
 
     const col = await getCollection(collection);
     const body = await request.json();
+    const { _id, createdAt, ...updates } = body;
+
     await col.updateOne(filter, {
       $set: {
-        ...body,
+        ...updates,
         updatedAt: new Date(),
       },
     });
